@@ -1,0 +1,22 @@
+library(adegenet)
+macro<-read.PLINK(choose.files(),n.cores=1)
+meso99<-read.PLINK(choose.files(),n.cores=1)
+meso20<-read.PLINK(choose.files(),n.cores=1)
+
+pcaM<-glPca(macro,parallel=FALSE)
+pcam99<-glPca(meso99,parallel=FALSE)
+pcam20<-glPca(meso20,parallel=FALSE)
+
+colM<-c("#d95f02","#d95f02","#d95f02","#7570b3","#1b9e77")
+colm99<-c("#d95f02","#d95f02","#d95f02","#7570b3","#d95f02")
+colm20<-c("#d95f02","#d95f02","#d95f02","#d95f02","#d95f02")
+
+tiff("PCA_M.tiff",width=7, height=7, units= 'in', res=600, pointsize=1/600)
+s.class(pcaM$scores, pop(macro),xax=1,yax=2, col=transp(colM,.6), axesell=FALSE,cstar=0, cpoint=3, grid=FALSE,cellipse=1,label=c(),pch=20) 
+dev.off()
+tiff("PCA_m99.tiff",width=7, height=7, units= 'in', res=600, pointsize=1/600)
+s.class(pcam99$scores, pop(meso99),xax=1,yax=2, col=transp(colm99,.6), axesell=FALSE,cstar=0, cpoint=3, grid=FALSE,cellipse=1,label=c(),pch=20)
+dev.off()
+tiff("PCA_m20.tiff",width=7, height=7, units= 'in', res=600, pointsize=1/600)
+s.class(pcam20$scores, pop(meso20),xax=1,yax=2, col=transp(colm20,.6), axesell=FALSE,cstar=0, cpoint=3, grid=FALSE,cellipse=1,label=c(),pch=20)
+dev.off()

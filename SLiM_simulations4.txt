@@ -1,0 +1,18 @@
+### SLiM
+
+## Fourth set of simulations:
+# Input .slim files in "SLiM set four". You need 100 files that generate vcf
+# files with different names (i.e.: ...1.vcf, ...2.vcf, ...N.vcf, ...100.vcf).
+
+# Run them with the script:
+slim INPUT_1 > OUTPUT_1.txt
+slim INPUT_2 > OUTPUT_2.txt
+slim INPUT_N > OUTPUT_N.txt
+slim INPUT_100 > OUTPUT_100.txt
+
+# !!! For being comparable they should be run with the same 100 seeds.
+
+# Nucleotide diversity values can be calculated using vcftools as in "SLiM_simulations3.txt"
+# And processed separately for the various time points.
+# These can then be plotted for the 5 populations from the 5 timepoints.
+

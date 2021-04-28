@@ -1,0 +1,31 @@
+# To get rxy (as PI_HAT) and Z scores to be used to infer kinship classes use the --genome option in plink.
+# As simple as that
+
+plink --file YOUR_PED --aec --genome --out YOUR_OUTPUT
+
+# Plot within population rxy
+data<-read.table("C:/Users/localadmin/Desktop/Post-Doc/Antarctic_gastropodes/Nacella/RADseq/Very_Final_Files/DP5/Gen_diversity/Relatedness/Nacella_DP5_All.genome", h=T)
+# within location rxy (all pops)
+tiff("rxy_within.tiff",width=10, height=7, units= 'in', res=600, pointsize=1/600)
+boxplot(
+c(data$PI_HAT[data$FID1=="RS99"&data$FID2=="RS99"],data$PI_HAT[data$FID2=="RS99"&data$FID1=="RS99"]),
+c(data$PI_HAT[data$FID1=="M3"&data$FID2=="M3"],data$PI_HAT[data$FID2=="M3"&data$FID1=="M3"]),
+c(data$PI_HAT[data$FID1=="G"&data$FID2=="G"],data$PI_HAT[data$FID2=="G"&data$FID1=="G"]),
+c(data$PI_HAT[data$FID1=="DR"&data$FID2=="DR"],data$PI_HAT[data$FID2=="DR"&data$FID1=="DR"]),
+c(data$PI_HAT[data$FID1=="L99"&data$FID2=="L99"],data$PI_HAT[data$FID2=="L99"&data$FID1=="L99"]),
+c(data$PI_HAT[data$FID1=="L20"&data$FID2=="L20"],data$PI_HAT[data$FID2=="L20"&data$FID1=="L20"]),
+c(data$PI_HAT[data$FID1=="RG99"&data$FID2=="RG99"],data$PI_HAT[data$FID2=="RG99"&data$FID1=="RG99"]),
+c(data$PI_HAT[data$FID1=="RG20"&data$FID2=="RG20"],data$PI_HAT[data$FID2=="RG20"&data$FID1=="RG20"]),
+c(data$PI_HAT[data$FID1=="T99"&data$FID2=="T99"],data$PI_HAT[data$FID2=="T99"&data$FID1=="T99"]),
+c(data$PI_HAT[data$FID1=="T20"&data$FID2=="T20"],data$PI_HAT[data$FID2=="T20"&data$FID1=="T20"]),
+c(data$PI_HAT[data$FID1=="A99"&data$FID2=="A99"],data$PI_HAT[data$FID2=="A99"&data$FID1=="A99"]),
+c(data$PI_HAT[data$FID1=="AN20"&data$FID2=="AN20"],data$PI_HAT[data$FID2=="AN20"&data$FID1=="AN20"]),
+c(data$PI_HAT[data$FID1=="EB99"&data$FID2=="EB99"],data$PI_HAT[data$FID2=="EB99"&data$FID1=="EB99"]),
+c(data$PI_HAT[data$FID1=="EB20"&data$FID2=="EB20"],data$PI_HAT[data$FID2=="EB20"&data$FID1=="EB20"]),
+names=c("Sig","Sno","Gal","Dob","L99","L20","RG99","RG20","T99","T20","AN99","AN20","EB99","EB20"), ylim=c(0,0.6)
+)
+abline(v=4.5)
+abline(v=c(6.5,8.5,10.5,12.5),lty=2)
+dev.off()
+
+# Z0 scores are within the same file and can be used to infer relatedness classes as in Manichaikul, A. et al. Robust relationship inference in genome-wide association studies. Bioinformatics 26, 2867–2873, doi:10.1093/bioinformatics/btq559 (2010).

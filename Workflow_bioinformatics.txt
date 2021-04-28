@@ -1,0 +1,145 @@
+############################################
+########## Nacella bioinformatics ##########
+############################################
+
+# Check quality of all fastq files with fastQC
+fastqc *.fq
+
+##################
+##### Stacks #####
+##################
+
+# Select 8 samples with highest number of reads (from as many different populaions and year)
+# And run parameter exploration (before that, create appropriate output directories and create population map for the 12 test samples):
+nohup ./Param_Explor.sh &
+# 'Param_Explor.sh':
+# ~/bin/denovo_map.pl --samples ./ --popmap ./12_Map_for_ParamExp.txt -o ParExp_11 -M 1 -n 1 -X "populations: -r 0.8" -T 10
+# ~/bin/denovo_map.pl --samples ./ --popmap ./12_Map_for_ParamExp.txt -o ParExp_22 -M 2 -n 2 -X "populations: -r 0.8" -T 10
+# ~/bin/denovo_map.pl --samples ./ --popmap ./12_Map_for_ParamExp.txt -o ParExp_33 -M 3 -n 3 -X "populations: -r 0.8" -T 10
+# ~/bin/denovo_map.pl --samples ./ --popmap ./12_Map_for_ParamExp.txt -o ParExp_44 -M 4 -n 4 -X "populations: -r 0.8" -T 10
+# ~/bin/denovo_map.pl --samples ./ --popmap ./12_Map_for_ParamExp.txt -o ParExp_55 -M 5 -n 5 -X "populations: -r 0.8" -T 10
+# ~/bin/denovo_map.pl --samples ./ --popmap ./12_Map_for_ParamExp.txt -o ParExp_66 -M 6 -n 6 -X "populations: -r 0.8" -T 10
+# ~/bin/denovo_map.pl --samples ./ --popmap ./12_Map_for_ParamExp.txt -o ParExp_77 -M 7 -n 7 -X "populations: -r 0.8" -T 10
+# ~/bin/denovo_map.pl --samples ./ --popmap ./12_Map_for_ParamExp.txt -o ParExp_88 -M 8 -n 8 -X "populations: -r 0.8" -T 10
+# ~/bin/denovo_map.pl --samples ./ --popmap ./12_Map_for_ParamExp.txt -o ParExp_99 -M 9 -n 9 -X "populations: -r 0.8" -T 10
+
+# The best parameters are -M = 6 and -n = 6
+
+# Now let's run the complete pipeline (by hand) making sure not to:
+
+## 1. Ustacks. Let's run it using denovo_map.pl, as it is simpler to use (we will then either stop the run when it is complete or delete the non-ustacks outputs).
+# Create map with all samples
+ls -1 *.1.fq | sed 's/.1.fq/ 1/g' > All_PopMap.txt # type ' ' as Ctrl+v <tab>
+# Run ustacks via denovo_map.pl (create appropriate output directory):
+nohup ~/bin/denovo_map.pl --samples ./ --popmap ./All_PopMap.txt -o All_output_66 -M 6 -n 6 -T 15 &
+# Now, let's look at the denovo_map.log file to extract samples RADtag depths of coverage, and at individual .tags.tsv files to get the number of RADtags assembled in each sample.
+# Also generate a list of samples to be used for the catalog with >= 250000 assembled RADtags (close to asymptote with enough samples)
+# and with >=3105447 reads (corresponding to a depth of coverage of 10x based on the fitted lm model).
+# R
+ind<-which(data$Number_of_reads>=3105447 & data$RADtags>=250000)
+catalog<-data$Sample_ID[ind]
+write.table(catalog,"samples_to_be_used_for_catalog.txt",quote=F,col.names=F,row.names=F,sep="\t")
+# Trnasfer it to grendizer and format it as a population map.
+sed 's/_1.fq/  1/g' samples_to_be_used_for_catalog.txt > PopMap_catalog.txt
+# Run cstacks to build the catalog
+nohup ~/bin/cstacks -P ./ -M ./PopMap_catalog.txt -n 6 -p 15 &
+# sstacks
+# Create a population map for sstacks.
+cp All_PopMap.txt sstacks_popMap.txt
+# Run sstacks
+nohup ~/bin/sstacks -P ./ -M ./sstacks_popMap.txt -p 15 &
+# tsv2bam !!! paired !!!
+nohup ~/bin/tsv2bam -P ./ -M ./sstacks_popMap.txt -R ../ -t 15 &
+# gstacks !!! rmdup !!!
+mkdir rmDup
+nohup ~/bin/gstacks -P ./ -M ./sstacks_popMap.txt -O rmDup -t 10 --rm-pcr-duplicates &
+# populations
+cd rmDup
+mv * ../
+cd ../
+nohup ~/bin/populations -P ./ -O ./ -M ./sstacks_popMap.txt -t 20 --vcf &
+mv populations.* rmDup
+
+# Now identify catalog loci present in atleast 80% of samples and retain in the vcf file only SNP coming from these loci
+
+grep '>' catalog.fasta | cut -d ' ' -f1,2 | sed 's/NS=//g' > NS_catalog.txt
+
+R
+data<-read.table("NS_catalog.txt",h=F)
+ind<-which(data[,2]>=(140*0.8))
+out<-data[ind,1]
+write.table(out,"genuine_catLoci.txt",quote=F,col.names=F,row.names=F,sep="\t")
+
+# Create the catalog of final loci
+grep -A 1 -f genuine_catLoci.txt 80_perc_catalog.fasta | sed 's/-//g' > 80perc_catalog.fasta
+
+# Keep only SNPs from these loci in the vcf file:
+# To do so create a bed file with catalog locus ID in the first column and 1 and 1000 as start and end positions (no de novo assembled RAD locus is longer than 1000, by far...)
+sed 's/ /    1       1000/g' genuine_catLoci.txt | sed 's/>//g' > genLoc.bed
+vcftools --vcf populations.snps.vcf --bed genLoc.bed --recode --out populations.snps.vcf
+
+##########################
+#### SNPs Filtering ######
+##########################
+mkdir filtering
+# 1. Remove indels and more-than-biallelic SNPs
+vcftools --vcf ../populations.snps.vcf --remove-indels --min-alleles 2 --max-alleles 2 --recode --out Nacella_noIndelsOnlyBiallelic &
+# 2. Replace genotypes with GQ and DP < 5 with NA
+vcftools --vcf Nacella_noIndelsOnlyBiallelic.recode.vcf --minGQ 5 --minDP 5 --recode --out Nacella_GQ5_DP5
+# 3. Remove loci with > 10% of missing data
+vcftools --vcf Nacella_GQ5_DP5.recode.vcf --max-missing 0.9 --recode --out Nacella_BiAll_GQDP5_MD90
+# 4. Remove loci with too high mean coverage (twice mean dataset coverage):
+vcftools --vcf Nacella_BiAll_GQDP5_MD90.recode.vcf --site-mean-depth --out Nacella_biall_GQDP5_MD90_perSite_meanDepth & # Generates per-site mean depth stats (check it in R to set the thershold for the next step)
+vcftools --vcf Nacella_BiAll_GQDP5_MD90.recode.vcf --max-meanDP 27.32324 --recode --out Nacella_biAll_GQDP5_MD90_MaxDC27
+# 5. Remove SNPs with MAF < 0.01
+vcftools --vcf Nacella_biAll_GQDP5_MD90_MaxDC27.recode.vcf --maf 0.01 --recode --out Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01
+# 6. HWE filtering
+vcftools --vcf Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01.recode.vcf --out Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01 --plink
+plink --file Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01 --aec --hwe midp 0.01 --make-bed --out Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01_HWE01
+# 7. LD pruning
+plink --bfile Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01_HWE01 --indep 50 5 2 --aec --out DP5_LDpruning
+plink --bfile Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01_HWE01 --exclude DP5_LDpruning.prune.out --aec --make-bed --out Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01_HWE01_LD2
+plink --bfile Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01_HWE01_LD2 --recode --out Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01_HWE01_LD2 --allow-extra-chr
+plink --bfile Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01_HWE01_LD2 --recodeA --out Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01_HWE01_LD2 --allow-extra-chr
+# 8. Let's remove samples with too many missing data (>30%):
+# R
+data<-read.table(choose.files(),h=T)
+md<-apply(data[,7:dim(data)[2]],1,function(x) length(which(is.na(x))))
+ind<-which(md>(109760*0.3))
+ndata<-data[-ind,]
+write.table(ndata,"Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01_HWE01_LD2_NA30.raw",quote=F,col.names=T,row.names=F)
+ped<-read.table(choose.files(),h=F,colClasses="character")
+nped<-ped[-ind,]
+write.table(nped,"Nacella_biAll_GQDP5_MD90_MaxDC27_MAF01_HWE01_LD2_NA30.ped",quote=F,col.names=F,row.names=F)
+# Final dataset 4.66%
+
+# Put population ID in FID column in plink files in R
+
+fam<-c()
+fam[1:10]<-"A99"
+fam[11:20]<-"DR"
+fam[21:30]<-"EB99"
+fam[31:39]<-"G"
+fam[40:49]<-"L99"
+fam[50:59]<-"M3"
+fam[60]<-"EB20"
+fam[61]<-"RG20"
+fam[62:69]<-"AN20"
+fam[70:76]<-"EB20"
+fam[77:85]<-"L20"
+fam[86:93]<-"RG20"
+fam[94:100]<-"T20"
+fam[101:110]<-"RG99"
+fam[111:120]<-"RS99"
+fam[121:130]<-"T99"
+fam[131:132]<-"AN20"
+fam[133]<-"EB20"
+fam[134]<-"RG20"
+
+
+
+
+
+
+
+

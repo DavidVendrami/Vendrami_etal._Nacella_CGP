@@ -1,0 +1,107 @@
+### SLiM
+
+## Third set of simulations:
+# Input .slim files in "SLiM set three". The name of the files says how much collective dispersal (CD) from the source population
+# and random dispersal (random) happens in the sink population. You need 100 files for each CD-random combination that generates vcf
+# files with different names (i.e.: ...1.vcf, ...2.vcf, ...N.vcf, ...100.vcf).
+
+# Run them with the script:
+slim INPUT_1 > OUTPUT_1.txt
+slim INPUT_2 > OUTPUT_2.txt
+slim INPUT_N > OUTPUT_N.txt
+slim INPUT_100 > OUTPUT_100.txt
+
+# !!! For being comparable they should be run with the same 100 seeds for the various CD-random combinations.
+
+# Then:
+#####################################################
+######## Calculate nucleotide diversity - pi ########
+#####################################################
+
+vcftools --vcf $i --min-alleles 2 --max-alleles 2 --remove-indels --keep p1.txt --window-pi 100000 --out All/CD100_pi/${i%.vcf}_p1  #p1.txt is a text file containing the simulated smaple IDs for population 1. 
+vcftools --vcf $i --min-alleles 2 --max-alleles 2 --remove-indels --keep p2.txt --window-pi 100000 --out All/CD100_pi/${i%.vcf}_p2  #p2.txt is a text file containing the simulated smaple IDs for population 2. 
+vcftools --vcf $i --min-alleles 2 --max-alleles 2 --remove-indels --keep p3.txt --window-pi 100000 --out All/CD100_pi/${i%.vcf}_p3  #p3.txt is a text file containing the simulated smaple IDs for population 3. 
+vcftools --vcf $i --min-alleles 2 --max-alleles 2 --remove-indels --keep p4.txt --window-pi 100000 --out All/CD100_pi/${i%.vcf}_p4  #p4.txt is a text file containing the simulated smaple IDs for population 4. 
+vcftools --vcf $i --min-alleles 2 --max-alleles 2 --remove-indels --keep p5.txt --window-pi 100000 --out All/CD100_pi/${i%.vcf}_p5  #p5.txt is a text file containing the simulated smaple IDs for population 5. 
+
+
+
+for j in {1..5}
+do
+for i in *_p$j.windowed.pi
+do tail -1 $i | cut -d$'\t' -f5 >> p$j.txt
+done
+done
+
+paste p1.txt p2.txt p3.txt p4.txt p5.txt > ran_ext_pi.txt
+
+# Repeat for every CD-random combination.
+
+
+
+# Plot in R (the number after data refers to the amount of CD which the fiels refers to)
+data0<-read.table(choose.files(),h=F)
+for (i in 1:length(data0[,1])){
+data0[i,]<-data0[i,]/max(data0[i,])
+}
+
+data10<-read.table(choose.files(),h=F)
+for (i in 1:length(data10[,1])){
+data10[i,]<-data10[i,]/max(data10[i,])
+}
+
+data100<-read.table(choose.files(),h=F)
+for (i in 1:length(data100[,1])){
+data100[i,]<-data100[i,]/max(data100[i,])
+}
+
+data20<-read.table(choose.files(),h=F)
+for (i in 1:length(data20[,1])){
+data20[i,]<-data20[i,]/max(data20[i,])
+}
+
+data30<-read.table(choose.files(),h=F)
+for (i in 1:length(data30[,1])){
+data30[i,]<-data30[i,]/max(data30[i,])
+}
+
+data40<-read.table(choose.files(),h=F)
+for (i in 1:length(data40[,1])){
+data40[i,]<-data40[i,]/max(data40[i,])
+}
+
+data50<-read.table(choose.files(),h=F)
+for (i in 1:length(data50[,1])){
+data50[i,]<-data50[i,]/max(data50[i,])
+}
+
+data60<-read.table(choose.files(),h=F)
+for (i in 1:length(data60[,1])){
+data60[i,]<-data60[i,]/max(data60[i,])
+}
+
+data70<-read.table(choose.files(),h=F)
+for (i in 1:length(data70[,1])){
+data70[i,]<-data70[i,]/max(data70[i,])
+}
+
+data80<-read.table(choose.files(),h=F)
+for (i in 1:length(data80[,1])){
+data80[i,]<-data80[i,]/max(data80[i,])
+}
+
+data95<-read.table(choose.files(),h=F)
+for (i in 1:length(data95[,1])){
+data95[i,]<-data95[i,]/max(data95[i,])
+}
+
+data90<-read.table(choose.files(),h=F)
+for (i in 1:length(data90[,1])){
+data90[i,]<-data90[i,]/max(data90[i,])
+}
+
+
+boxplot(data0[,1],data10[,1],data20[,1],data30[,1],data40[,1],data50[,1],data60[,1],data70[,1],data80[,1],
+data90[,1],data95[,1],data100[,1],ylim=c(0.7,1),names=c("0","10","20","30","40","50","60","70","80","90","95","100"),xlab="CD (%)")
+
+
