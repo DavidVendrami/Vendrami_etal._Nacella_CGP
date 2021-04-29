@@ -2,7 +2,7 @@
 
 ## Second set of simulations:
 # Input .slim files in "SLiM set two". The name of the files says how much collective dispersal (CD) from the source population
-# and random dispersal (random) Happens in the sink population.
+# and random dispersal (random) gose into the sink population.
 
 # Run them with the script:
 #!/bin/bash
@@ -15,8 +15,12 @@ slim $m > $m$n.txt
 done
 done
 
-# Format outputs (col1 = 0, col2 = 0.25, col3 = 0.5)
-
+# Format outputs to get kinships (col1 = unrelated, col2 = half sibs, col3 = full sibs)
+cd CD0
+for i in *.out; do grep '0:' $i | head -1 | sed 's/0://g' | sed 's/, 0.25://g'  | sed 's/, 0.5://g' >> 1Y_randMig.res; done
+cd ../CD100
+for i in *.out; do grep '0:' $i | head -1 | sed 's/0://g' | sed 's/, 0.25://g'  | sed 's/, 0.5://g' >> 1Y_OnlyCD.res; done
+cd ../CD95
 for i in *.out; do grep '0:' $i | head -1 | sed 's/0://g' | sed 's/, 0.25://g'  | sed 's/, 0.5://g' >> 1Y_95CD_5random.res; done
 cd ../CD90
 for i in *.out; do grep '0:' $i | head -1 | sed 's/0://g' | sed 's/, 0.25://g'  | sed 's/, 0.5://g' >> 1Y_90CD_10random.res; done
@@ -49,108 +53,4 @@ for i in 1Y_40CD_60random.slim*.txt; do grep '0:' $i | head -1 | sed 's/0://g' |
 for i in 1Y_30CD_70random.slim*.txt; do grep '0:' $i | head -1 | sed 's/0://g' | sed 's/, 0.25://g'  | sed 's/, 0.5://g' >> Res/1Y_30CD_70random.res; done
 for i in 1Y_20CD_80random.slim*.txt; do grep '0:' $i | head -1 | sed 's/0://g' | sed 's/, 0.25://g'  | sed 's/, 0.5://g' >> Res/1Y_20CD_80random.res; done
 for i in 1Y_10CD_90random.slim*.txt; do grep '0:' $i | head -1 | sed 's/0://g' | sed 's/, 0.25://g'  | sed 's/, 0.5://g' >> Res/1Y_10CD_90random.res; done
-
-# plot
-library(adegenet)
-attach(mtcars)
-
-fil_nam_Y<-c("1Y_OnlyCD.res",
-           "1Y_95CD_5random.res",
-           "1Y_90CD_10random.res",
-           "1Y_80CD_20random.res",
-           "1Y_70CD_30random.res",
-           "1Y_60CD_40random.res",
-           "1Y_50CD_50random.res",
-           "1Y_40CD_60random.res",
-           "1Y_30CD_70random.res",
-           "1Y_20CD_80random.res",
-		   "1Y_10CD_90random.res",
-		   "1Y_randMig.res")
-		   
-mat_m_CD<-matrix( ,nrow=12,ncol=3)
-mat_sd_CD<-matrix( ,nrow=12,ncol=3)		   
-		   
-for (i in 1:12){
-
-data<-read.table(paste(fil_nam_Y[i]),h=F)
-data<-data/2
-for (j in 1:length(data[,1])){
-tot<-sum(data[j,])
-data[j,1]<-data[j,1]/tot
-data[j,2]<-data[j,2]/tot
-data[j,3]<-data[j,3]/tot
-}
-
-mat_m_CD[i,1]<-mean(data[,1])
-mat_m_CD[i,2]<-mean(data[,2])
-mat_m_CD[i,3]<-mean(data[,3])
-
-mat_sd_CD[i,1]<-sd(data[,1])
-mat_sd_CD[i,2]<-sd(data[,2])
-mat_sd_CD[i,3]<-sd(data[,3])
-}
-
-tiff("Sim_CD.tiff",width=7, height=7, units= 'in', res=600, pointsize=1/600)
-
-plot(seq(0.9,11.9,by=1),mat_m_CD[,1],pch=20,type='b',cex=3,col=transp("#d95f02",.6),xaxt='n',xlab="Amount of random migration (%)",ylab="Proportion",ylim=c(0,1),xlim=c(1,12))
-axis(1,at=c(1:12),labels=c("0","5","10","20","30","40","50","60","70","80","90","100"))
-par(new=T)
-plot(seq(1,12,by=1),mat_m_CD[,2],pch=20,type='b',cex=3,col=transp("#1b9e77",.6),xaxt='n',yaxt='n',xlab="",ylab="",ylim=c(0,1),xlim=c(1,12))
-par(new=T)
-plot(seq(1.1,12.1,by=1),mat_m_CD[,3],pch=20,type='b',cex=3,col=transp("#7570b3",.6),xaxt='n',yaxt='n',xlab="",ylab="",ylim=c(0,1),xlim=c(1,12))
-
-arrows(seq(0.9,11.9,by=1), mat_m_CD[,1]-mat_sd_CD[,1],seq(0.9,11.9,by=1),mat_m_CD[,1]+mat_sd_CD[,1], col=transp("#d95f02",.6),length=0.0)
-arrows(seq(1,12,by=1), mat_m_CD[,2]-mat_sd_CD[,2],seq(1,12,by=1),mat_m_CD[,2]+mat_sd_CD[,2], col=transp("#1b9e77",.6),length=0.0)
-arrows(seq(1.1,12.1,by=1), mat_m_CD[,3]-mat_sd_CD[,3],seq(1.1,12.1,by=1),mat_m_CD[,3]+mat_sd_CD[,3], col=transp("#7570b3",.6),length=0.0)
-
-legend(8,20,legend=c("Unrelated","Half-siblings","Full-siblings"),fill=transp(c("#d95f02","#1b9e77","#7570b3"),.6))
-
-
-dev.off()
-
-# % of good sims
-fil_nam_Y<-c("1Y_OnlyCD.res",
-           "1Y_95CD_5random.res",
-           "1Y_90CD_10random.res",
-           "1Y_80CD_20random.res",
-           "1Y_70CD_30random.res",
-           "1Y_60CD_40random.res",
-           "1Y_50CD_50random.res",
-           "1Y_40CD_60random.res",
-           "1Y_30CD_70random.res",
-           "1Y_20CD_80random.res",
-		   "1Y_10CD_90random.res",
-		   "1Y_randMig.res")
-		   
-for (i in 1:12){
-data<-read.table(paste(fil_nam_Y[i]),h=F)
-print(paste(i,": ",length(which(data[,1]==0))))
-}
-
-######################
-
-data<-read.table("CDRMsuc.txt",h=F)
-
-tiff("SLim_Expl_PropSucc_mig.tiff",width=7, height=7, units= 'in', res=600, pointsize=1/600)
-barplot(data[,2],names=c("0","5","10","20","30","40","50","60","70","80","90","100"),xlab="Amount of random migration (%)",ylab="# Successes")
-dev.off()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
