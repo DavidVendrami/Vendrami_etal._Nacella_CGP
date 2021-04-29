@@ -14,4 +14,14 @@ slim INPUT_100 > OUTPUT_100.txt
 
 # Nucleotide diversity values can be calculated using vcftools as in "SLiM_simulations3.txt",
 # but the 4 timepoints (i.e.: T1, T2, T3 and T4) have to be processed separately.
+for i in *_T1_*.vcf
+do
+vcftools --vcf $i --min-alleles 2 --max-alleles 2 --remove-indels --keep p1.txt --window-pi 100000 --out All/CD100_pi/${i%.vcf}_p1  #p1.txt is a text file containing the simulated smaple IDs for population 1. 
+vcftools --vcf $i --min-alleles 2 --max-alleles 2 --remove-indels --keep p2.txt --window-pi 100000 --out All/CD100_pi/${i%.vcf}_p2  #p2.txt is a text file containing the simulated smaple IDs for population 2. 
+vcftools --vcf $i --min-alleles 2 --max-alleles 2 --remove-indels --keep p3.txt --window-pi 100000 --out All/CD100_pi/${i%.vcf}_p3  #p3.txt is a text file containing the simulated smaple IDs for population 3. 
+vcftools --vcf $i --min-alleles 2 --max-alleles 2 --remove-indels --keep p4.txt --window-pi 100000 --out All/CD100_pi/${i%.vcf}_p4  #p4.txt is a text file containing the simulated smaple IDs for population 4. 
+vcftools --vcf $i --min-alleles 2 --max-alleles 2 --remove-indels --keep p5.txt --window-pi 100000 --out All/CD100_pi/${i%.vcf}_p5  #p5.txt is a text file containing the simulated smaple IDs for population 5. 
+done
+
+# Repeat changing "T1" within the loop variable to "T2", "T3" and "T4"
 
