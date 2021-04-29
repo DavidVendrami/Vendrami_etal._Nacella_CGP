@@ -46,7 +46,7 @@ write.table(mat,"YOUR_OUTPUT.geno",quote=F,col.names=F,row.names=F)
 ~/bin/baypass_2.1/sources/g_baypass -npop 2 -gfile YOUR_OUTPUT.geno -nthreads 8 -outprefix YOUR_OUTPUT_PREFIX &
 ~/bin/baypass_2.1/sources/g_baypass -npop 2 -gfile YOUR_OUTPUT.geno -nthreads 8 -outprefix YOUR_OUTPUT_PREFIX &
 
-# Back to R; analyse BayPAss results as of manual (I've even kept the same variable names...) 
+# Back to R; analyse BayPAss results as of manual
 require(corrplot) ; require(ape)
 source("baypass_utils.R")
 
