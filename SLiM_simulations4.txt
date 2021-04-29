@@ -12,7 +12,6 @@ slim INPUT_100 > OUTPUT_100.txt
 
 # !!! For being comparable they should be run with the same 100 seeds.
 
-# Nucleotide diversity values can be calculated using vcftools as in "SLiM_simulations3.txt"
-# And processed separately for the various time points.
-# These can then be plotted for the 5 populations from the 5 timepoints.
+# Nucleotide diversity values can be calculated using vcftools as in "SLiM_simulations3.txt",
+# but the 4 timepoints (i.e.: T1, T2, T3 and T4) have to be processed separately.
 
