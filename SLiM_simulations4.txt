@@ -25,3 +25,14 @@ done
 
 # Repeat changing "T1" within the loop variable to "T2", "T3" and "T4"
 
+# For processing, proceed as in "SLiM_simulations3.txt":
+#Put the 100 simulations for each population FROM ONE TIME POINT together (i.e.: repeat by changing T1 with T2, T3 and T4)
+for j in {1..5}
+do
+for i in *T1*_p$j.windowed.pi
+do tail -1 $i | cut -d$'\t' -f5 >> p$j.txt
+done
+done
+
+# Put all populations FROM ONE TIMEPOINT together in a single file (col 1 to 5 = pops 1 to 5)
+paste p1.txt p2.txt p3.txt p4.txt p5.txt > ran_ext_pi.txt
