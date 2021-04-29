@@ -1,10 +1,10 @@
 # Vendrami_etal._Nacella_CGP
 Code availability for analysis of Nacella CGP
 
-Within this repository there are the codes for the analysis of the Nacella CGP work that is currently under review. It should soon appear on bioRxiv.
+Within this repository there is the code used to perform the analyses of the Nacella CGP work from Vendrami et al. that is currently under review. It should soon appear on bioRxiv though.
 
 This repository is definitely a work still in progress and I deeply apologize to anybody who will find it hard to follow the scripts (as a good deal of them is without
-proper comments...). Please do not hesitate to contact me at david.vendrami@edu.unife.it for clarifications that I will be happy to provide promptly.
+proper comments...). Please do not hesitate to contact me at david.vendrami@edu.unife.it for clarifications that I will be very happy to provide promptly.
 
 The file names should be self explanatory, but here a quick overview:
 BayPass.r contains the code for running the scan for ourlier loci implemented in BayPass
@@ -25,4 +25,4 @@ sNMF.r is a script to carry out a genetic structure analysis using sparse non-ne
 
 Workflow_bioinformatics.txt describes the entire workflow to go from the raw sequencing reads to clean and filtered plink files which are used as input for the majority of the analyses,
 
-the four SLIM_simulation text files describe how to run the SLiM simulations using the .slim files present in the four SLiM folders sa input.
+the four SLIM_simulation text files describe how to run the SLiM simulations using the .slim files present in the four SLiM folders as input.
