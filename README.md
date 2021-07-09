@@ -1,15 +1,14 @@
 # Vendrami_etal._Nacella_CGP
 Code availability for analysis of Nacella CGP
 
-Within this repository there is the code used to perform the analyses of the Nacella CGP work from Vendrami et al. that is currently under review. It should soon appear on bioRxiv though.
+Within this repository there is the code used to perform the analyses of the Nacella CGP work from Vendrami et al. that is currently under review. 
 
-This repository is definitely a work still in progress and I deeply apologize to anybody who will find it hard to follow the scripts (as a good deal of them is without
-proper comments...). Please do not hesitate to contact me at david.vendrami@edu.unife.it for clarifications that I will be very happy to provide promptly.
+Please do not hesitate to contact me at david.vendrami@edu.unife.it for clarifications that I will be very happy to provide promptly.
 
 The file names should be self explanatory, but here a quick overview:
 BayPass.r contains the code for running the scan for ourlier loci implemented in BayPass
 
-DrifterRothera.m is a file provided by Michael Meredith. It reads the drifter data from the raw format and exports to matlab, at which point the manual editing and plotting can be done. For any questions regarding this file I wil lre-direct you to Michael.
+DrifterRothera.m is a file provided by Michael Meredith. It reads the drifter data from the raw format and exports to matlab, at which point the manual editing and plotting can be done. I will re-direct you to Michael for any questions regarding this file.
 
 Fst.r is the code to calculate Fst measures,
 
